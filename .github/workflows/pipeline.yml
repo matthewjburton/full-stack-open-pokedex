@@ -48,3 +48,11 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+      # Deploy to Fly.io (only if previous steps succeed)
+      - name: Deploy to Fly.io
+        if: ${{ success() }}
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
