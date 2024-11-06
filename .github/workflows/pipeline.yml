@@ -12,39 +12,32 @@ jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-20.04
     steps:
-      # Check out the code
-      - uses: actions/checkout@v4
+      - name: Check out the code
+        uses: actions/checkout@v4
 
-      # Set up Node.js
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Run Linting
       - name: Lint
         run: npm run eslint
 
-      # Build the project
       - name: Build
         run: npm run build
 
-      # Run Unit Tests
-      - name: Run Unit Tests
+      - name: Run unit tests
         run: npm run test
 
-      # Install Playwright Browsers
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      # Run End-to-End Tests
-      - name: Run Playwright E2E Tests
+      - name: Run Playwright End-to-End Tests
         run: npx playwright test
 
-      # Upload Playwright report as an artifact if tests fail
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
@@ -53,13 +46,23 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      # Set up Flyctl
       - name: Set up Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      # Deploy to Fly.io
       - name: Deploy to Fly.io
         if: ${{ github.event_name == 'push' && success() }}
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Bump version and push tag
+        if: ${{ github.event_name == 'push'}}
+        uses: anothrNick/github-tag-action@1.71.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+          WITH_V: false
