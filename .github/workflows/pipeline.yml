@@ -83,7 +83,7 @@ jobs:
         uses: stegzilla/discord-notify@v4
         with:
           title: A new version of Pokedex has been deployed!
-          message: "**User:** ${{ github.actor }}\n**Link:** https://shorturl.at/Ls310\n**Commit**: https://github.com/${{ github.actor }}/full-stack-open-pokedex/commit/${{ github.event.commit.url }}"
+          message: "**User:** ${{ github.actor }}\n**Link:** https://full-stack-open-pokedex-bitter-tree-3534.fly.dev/\n**Commit**: https://github.com/${{ github.repository }}/commit/${{ github.event.commit.url }}"
           colour: '#a5db5e'
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
 
@@ -92,6 +92,6 @@ jobs:
         uses: stegzilla/discord-notify@v4
         with:
           title: New Pokedex build failed!
-          message: "**User:** ${{ github.actor }}\n**Commit**: https://github.com/${{ github.actor }}/full-stack-open-pokedex/commit/${{ github.event.commit.url }}"
+          message: "**User:** ${{ github.actor }}\n**Commit**: https://github.com/${{ github.repository }}/commit/${{ github.event.commit.url }}"
           colour: '#d93d3f'
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
