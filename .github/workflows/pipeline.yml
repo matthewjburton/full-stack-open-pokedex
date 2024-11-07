@@ -9,8 +9,11 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  simple_deployment_pipeline:
+  deployment_pipeline:
     runs-on: ubuntu-20.04
+    env:
+      SKIP_DEPLOY: ${{ contains(join(github.event.commits.*.message, ' '), '#skip') }}
+
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
@@ -47,17 +50,18 @@ jobs:
           retention-days: 30
 
       - name: Set up Flyctl
+        if: ${{ !env.SKIP_DEPLOY }}
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io
-        if: ${{ github.event_name == 'push' && success() }}
+        if: ${{ github.event_name == 'push' && success() && !env.SKIP_DEPLOY }}
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   tag_release:
-    needs: [simple_deployment_pipeline]
-    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [deployment_pipeline]
+    if: ${{ github.ref == 'refs/heads/main' && !needs.deployment_pipeline.outputs.SKIP_DEPLOY }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out the code
@@ -65,7 +69,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: '0'
+
       - name: Bump version and push tag
+        if: ${{ !env.SKIP_DEPLOY }}
         uses: anothrNick/github-tag-action@1.71.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
