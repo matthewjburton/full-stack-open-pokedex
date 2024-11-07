@@ -1,9 +1,6 @@
 name: Health Check
 
 on:
-  push:
-    branches:
-      - main
   schedule:
     # This runs every day at midnight EST
     - cron: '0 5 * * *'
