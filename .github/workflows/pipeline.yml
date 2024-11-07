@@ -78,6 +78,10 @@ jobs:
           DEFAULT_BUMP: patch
           WITH_V: false
 
+  discord_notification:
+    needs: [deployment_pipeline, tag_release]
+    runs-on: ubuntu-20.04
+    steps:
       - name: Success notification
         if: ${{ success() }}
         uses: stegzilla/discord-notify@v4
